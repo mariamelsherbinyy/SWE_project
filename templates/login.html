@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Page</title>
+
+  <!-- Load Pre-requisites for Google Sign-In -->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+  <script src="//apis.google.com/js/platform.js?onload=initGoogleSignIn" async defer></script>
+  <meta name="google-signin-client_id" content="602613241770-8ctq9ap8edd9b17q5knnn82s76u046jk.apps.googleusercontent.com">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f9f9f9;
+    }
+    .container {
+      width: 400px;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .form-group button {
+      width: 100%;
+      padding: 10px;
+      background-color: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .form-group button:hover {
+      background-color: #218838;
+    }
+    .divider {
+      text-align: center;
+      margin: 20px 0;
+      position: relative;
+    }
+    .divider:before,
+    .divider:after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 40%;
+      height: 1px;
+      background: #ddd;
+    }
+    .divider:before {
+      left: 0;
+    }
+    .divider:after {
+      right: 0;
+    }
+    .divider span {
+      background: #fff;
+      padding: 0 10px;
+      color: #888;
+    }
+    #signInButton {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Login to Artist Community</h2>
+
+    <!-- Standard Login Form -->
+    <form action="/login" method="POST">
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required>
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required>
+      <button type="submit">Login</button>
+  </form>
+  
+
+    <div class="divider">
+      <span>OR</span>
+    </div>
+
+    <!-- Google Sign-In Button -->
+    <div id="signInButton">
+      <div class="g-signin2" data-onsuccess="onSignIn" data-scope="profile email"></div>
+    </div>
+
+    <div class="divider">
+      <span>Don't have an account?</span>
+    </div>
+
+    <!-- Signup Link -->
+    <form id="signupForm" action="/signup" method="POST">
+      <div class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+      </div>
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" id="signupEmail" name="email" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="signupPassword" name="password" required>
+      </div>
+      <div class="form-group">
+        <button type="submit">Sign Up</button>
+      </div>
+    </form>
+
+    <div id="result"></div>
+  </div>
+
+  <script>
+    function initGoogleSignIn() {
+      console.log('Google Sign-In initialized.');
+    }
+
+    function onSignIn(googleUser) {
+      const id_token = googleUser.getAuthResponse().id_token;
+
+      // Send the ID token to the server
+      $.ajax({
+        type: 'POST',
+        url: '/gconnect?state={{STATE}}',
+        processData: false,
+        data: id_token,
+        contentType: 'application/octet-stream; charset=utf-8',
+        success: function(result) {
+          if (result) {
+            $('#result').html('Login Successful!<br>' + result + '<br>Redirecting...');
+            setTimeout(function() {
+              window.location.href = "/artist";
+            }, 4000);
+          } else {
+            $('#result').html('Failed to make a server-side call. Check your configuration and console.');
+          }
+        },
+        error: function(err) {
+          console.error('Error during server call:', err);
+        }
+      });
+    }
+  </script>
+</body>
+</html>
